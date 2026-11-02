@@ -1,0 +1,15 @@
+{
+  "guid": "e93f3537-69fa-4d5e-a354-620781d88cd1",
+  "name": "Jellyfin VR Player",
+  "version": "1.0.0.0",
+  "owner": "biliksir95-blip",
+  "repository": "biliksir95-blip/jellyfin-vr-player",
+  "overview": "Play 180°, 360°, fisheye and stereo videos in WebXR.",
+  "description": "Adds a VR button to Jellyfin Web's player controls. Supports 180°/360°, fisheye, flat cinema, SBS/OU stereo, controller input, seeking, zoom and H.264 compatibility streams. Installs its own web injection middleware and serves all JavaScript locally.",
+  "category": "General",
+  "changelog": "Initial server plugin release with local assets, automatic web injection and menu-only VR entry.",
+  "targets": [
+    { "name": "jellyfin10.11", "buildTarget": "jf10", "framework": "net9.0", "targetAbi": "10.11.0.0" },
+    { "name": "jellyfin12", "buildTarget": "jf12", "framework": "net10.0", "targetAbi": "12.0.0.0" }
+  ]
+}

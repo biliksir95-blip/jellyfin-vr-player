@@ -1,0 +1,24 @@
+name: Build and HTTP checks
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['manifest.json', '**.md', 'LICENSE']
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [jf10, jf12]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check Jellyfin_VR_Player.js
+      - run: dotnet run --project tests/Jellyfin.Plugin.VrPlayer.SmokeTests -c Release -p:JellyfinTarget=${{ matrix.target }} --no-launch-profile

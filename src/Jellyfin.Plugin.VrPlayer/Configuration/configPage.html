@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><title>Jellyfin VR Player</title></head>
+<body>
+  <div id="JellyfinVrPlayerConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-button,emby-checkbox">
+    <div data-role="content"><div class="content-primary">
+      <h2>Jellyfin VR Player</h2>
+      <p>开始播放视频后，点击播放器菜单栏中的 VR。支持 180°、360°、鱼眼、影院以及 SBS / OU 立体视频。</p>
+      <p>进入头盔 VR 需要 HTTPS（或 localhost）及支持 WebXR 的浏览器。此功能用于 Jellyfin Web。</p>
+      <form id="JellyfinVrPlayerConfigForm">
+        <div class="checkboxContainer checkboxContainer-withDescription">
+          <label class="emby-checkbox-label"><input id="jvrEnabled" type="checkbox" is="emby-checkbox"><span>启用 VR 播放器</span></label>
+          <div class="fieldDescription checkboxFieldDescription">保存后刷新 Jellyfin 网页即可生效。</div>
+        </div>
+        <button is="emby-button" type="submit" class="raised button-submit block"><span>保存</span></button>
+      </form>
+    </div></div>
+    <script>
+      (function () {
+        var pluginId = 'e93f3537-69fa-4d5e-a354-620781d88cd1';
+        var page = document.querySelector('#JellyfinVrPlayerConfigPage');
+        page.addEventListener('pageshow', function () {
+          Dashboard.showLoadingMsg();
+          ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+            page.querySelector('#jvrEnabled').checked = config.Enabled !== false;
+          }).catch(function () { Dashboard.alert('无法读取插件设置，请重试。'); })
+            .finally(function () { Dashboard.hideLoadingMsg(); });
+        });
+        page.querySelector('form').addEventListener('submit', function (event) {
+          event.preventDefault();
+          Dashboard.showLoadingMsg();
+          ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+            config.Enabled = page.querySelector('#jvrEnabled').checked;
+            return ApiClient.updatePluginConfiguration(pluginId, config);
+          }).then(function (result) {
+            Dashboard.processPluginConfigurationUpdateResult(result);
+          }).catch(function () { Dashboard.alert('保存失败，请重试。'); })
+            .finally(function () { Dashboard.hideLoadingMsg(); });
+        });
+      })();
+    </script>
+  </div>
+</body>
+</html>

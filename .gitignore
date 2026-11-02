@@ -1,0 +1,8 @@
+.tools/
+.nuget/
+dist/
+**/bin/
+**/obj/
+TestResults/
+*.user
+*.suo

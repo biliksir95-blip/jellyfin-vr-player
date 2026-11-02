@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <JellyfinTarget Condition="'$(JellyfinTarget)' == ''">jf10</JellyfinTarget>
+    <TargetFramework Condition="'$(JellyfinTarget)' == 'jf10'">net9.0</TargetFramework>
+    <TargetFramework Condition="'$(JellyfinTarget)' == 'jf12'">net10.0</TargetFramework>
+    <JellyfinVersion Condition="'$(JellyfinTarget)' == 'jf10'">10.11.0</JellyfinVersion>
+    <JellyfinVersion Condition="'$(JellyfinTarget)' == 'jf12'">12.0.0</JellyfinVersion>
+    <AssemblyName>Jellyfin.Plugin.VrPlayer</AssemblyName>
+    <RootNamespace>Jellyfin.Plugin.VrPlayer</RootNamespace>
+    <Version>1.0.0.0</Version>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Deterministic>true</Deterministic>
+    <RepositoryUrl>https://github.com/biliksir95-blip/jellyfin-vr-player</RepositoryUrl>
+    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Jellyfin.Controller" Version="$(JellyfinVersion)" ExcludeAssets="runtime" />
+    <PackageReference Include="Jellyfin.Model" Version="$(JellyfinVersion)" ExcludeAssets="runtime" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Configuration/configPage.html" />
+    <EmbeddedResource Include="../../Jellyfin_VR_Player.js" LogicalName="Jellyfin.Plugin.VrPlayer.Assets.player.js" />
+    <EmbeddedResource Include="../../third_party/three/three.min.js" LogicalName="Jellyfin.Plugin.VrPlayer.Assets.three.min.js" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,62 @@
+name: Publish plugin repository
+on:
+  push:
+    branches: [main]
+    paths: ['plugin.json']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: plugin-release
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Read release version
+        id: version
+        shell: pwsh
+        run: |
+          $metadata = Get-Content plugin.json -Raw | ConvertFrom-Json
+          "tag=v$($metadata.version)" >> $env:GITHUB_OUTPUT
+      - name: Refuse to overwrite a published version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "This version is already published. Increase plugin.json version before releasing again."
+            exit 1
+          fi
+      - run: node --check Jellyfin_VR_Player.js
+      - name: Test and package both server versions
+        shell: pwsh
+        run: ./scripts/build.ps1
+      - name: Publish immutable release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          gh release create "$RELEASE_TAG" dist/*.zip dist/manifest.json dist/Jellyfin_VR_Player.import.json --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Jellyfin VR Player $RELEASE_TAG" --notes-file RELEASE_NOTES.md
+      - name: Update installation catalog
+        shell: pwsh
+        run: |
+          Copy-Item -LiteralPath dist/manifest.json -Destination manifest.json -Force
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add manifest.json
+          git diff --cached --quiet
+          if ($LASTEXITCODE -ne 0) {
+            git commit -m 'Update plugin catalog for ${{ steps.version.outputs.tag }}'
+            if ($LASTEXITCODE -ne 0) { throw 'Catalog commit failed' }
+            git push origin HEAD:main
+            if ($LASTEXITCODE -ne 0) { throw 'Catalog push failed' }
+          }
+          "Install repository: https://raw.githubusercontent.com/$env:GITHUB_REPOSITORY/main/manifest.json" >> $env:GITHUB_STEP_SUMMARY
